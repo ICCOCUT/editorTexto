@@ -1,4 +1,6 @@
+
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter;
 import javax.swing.text.Highlighter;
@@ -13,6 +15,11 @@ public class EditorDeTexto extends JFrame implements ActionListener {
     private String nombreArchivo;
     private JTextField buscarCampo;
     private final Highlighter highlighter;
+    private JTable resultadosTabla = new JTable(new DefaultTableModel(new Object[]{"Expresión Aritmética", "Resultado"}, 0));
+    private ResultadosTabla resultadosTablaVentana;
+    private ResultadosTabla resultadosTablas;
+
+
 
     private boolean modoOscuro = true;
 
@@ -35,6 +42,7 @@ public class EditorDeTexto extends JFrame implements ActionListener {
         JMenuItem guardarItem = new JMenuItem("Guardar");
         JMenuItem guardarComoItem = new JMenuItem("Guardar como");
         JMenuItem cerrarItem = new JMenuItem("Cerrar");
+       
 
         archivoMenu.add(nuevoItem);
         archivoMenu.add(abrirItem);
@@ -49,6 +57,7 @@ public class EditorDeTexto extends JFrame implements ActionListener {
         JMenuItem cortarItem = new JMenuItem("Cortar");
         JMenuItem pegarItem = new JMenuItem("Pegar");
         JMenuItem analizarItem = new JMenuItem("Analizar");
+        JMenuItem resolverExpresionesItem = new JMenuItem("Resolver Expresiones");
 
         edicionMenu.add(buscarItem);
         edicionMenu.add(reemplazarItem);
@@ -56,6 +65,7 @@ public class EditorDeTexto extends JFrame implements ActionListener {
         edicionMenu.add(cortarItem);
         edicionMenu.add(pegarItem);
         edicionMenu.add(analizarItem);
+        edicionMenu.add(resolverExpresionesItem);
 
         JMenuItem cambiarModoItem = new JMenuItem("Cambiar Modo");
         archivoMenu.add(cambiarModoItem);
@@ -91,7 +101,10 @@ public class EditorDeTexto extends JFrame implements ActionListener {
         cortarItem.addActionListener(this);
         pegarItem.addActionListener(this);
         analizarItem.addActionListener(this);
+        resolverExpresionesItem.addActionListener(this);
         cambiarModoItem.addActionListener(this);
+        resultadosTablaVentana = new ResultadosTabla();
+        resultadosTablas = new ResultadosTabla();
 
         fileChooser = new JFileChooser();
 
@@ -198,6 +211,11 @@ public class EditorDeTexto extends JFrame implements ActionListener {
 
             case "Analizar":
                 analizarTexto();
+                
+                break;
+            case "Resolver Expresiones":
+                analizarYResolverExpresiones();
+                System.out.println("Eligio resoolver expresiones");
                 break;
 
             case "Cambiar Modo":
@@ -205,6 +223,94 @@ public class EditorDeTexto extends JFrame implements ActionListener {
                 break;
         }
     }
+
+    private void analizarYResolverExpresiones() {
+        String codigo = areaTexto.getText();
+        AnalizadorLexico analizador = new AnalizadorLexico();
+        ArrayList<Token> tokens = analizador.analizarCodigo(codigo);
+
+        // Resolver expresiones aritméticas
+        resolverExpresionesAritmeticas(tokens);
+
+        // Mostrar resultados en la tabla
+        obtenerYMostrarResultados(tokens);
+}
+
+
+private void resolverExpresionesAritmeticas(ArrayList<Token> tokens) {
+    EvaluadorExpresiones evaluador = new EvaluadorExpresiones();
+
+    // Construir la expresión completa
+    StringBuilder expresionCompleta = new StringBuilder();
+    for (Token token : tokens) {
+        expresionCompleta.append(token.getValor());
+    }
+
+    try {
+        System.out.println("Evaluando expresión: " + expresionCompleta); // Mensaje de depuración
+        String resultado = evaluador.evaluarExpresion(expresionCompleta.toString());
+        System.out.println("Resultado: " + resultado); // Mensaje de depuración
+
+        // Actualizar todos los tokens con el resultado
+        for (Token token : tokens) {
+            token.setTipo("RESULTADO");
+            token.setValor(resultado);
+        }
+    } catch (Exception e) {
+        // Manejar errores al evaluar la expresión
+        for (Token token : tokens) {
+            token.setTipo("ERROR");
+            token.setValor("Error al evaluar la expresión");
+        }
+    }
+
+    // Actualizar la tabla de resultados
+    actualizarTablaResultados(tokens);
+    }
+
+    private void obtenerYMostrarResultados(ArrayList<Token> tokens) {
+        ResultadosTabla resultadosTabla = new ResultadosTabla();
+    
+        for (Token token : tokens) {
+            if (token.getTipo().equals("RESULTADO")) {
+                resultadosTabla.agregarResultado(token.getValor(), token.getValor());
+            }
+        }
+    
+        resultadosTabla.setVisible(true);
+    }
+
+    
+    private void actualizarVentanaResultados(ArrayList<Token> tokens) {
+        // Crear una instancia de la ventana de resultados
+        ResultadosTabla resultadosTabla = new ResultadosTabla();
+    
+        // Filtrar los tokens que representan resultados de expresiones
+        ArrayList<Token> resultadosExpresiones = new ArrayList<>();
+        for (Token token : tokens) {
+            if (token.getTipo().equals("RESULTADO")) {
+                resultadosExpresiones.add(token);
+            }
+        }
+    
+        // Agregar los resultados a la ventana
+        for (Token resultado : resultadosExpresiones) {
+            resultadosTabla.agregarResultado(resultado.getValor(), resultado.getTipo());
+        }
+    
+        // Mostrar la ventana de resultados
+        resultadosTabla.setVisible(true);
+    }
+    
+    private void actualizarTablaResultados(ArrayList<Token> tokens) {
+        DefaultTableModel modelo = (DefaultTableModel) resultadosTabla.getModel();
+        modelo.setRowCount(0); // Limpiar la tabla antes de agregar nuevos datos
+
+        for (Token token : tokens) {
+            modelo.addRow(new Object[]{token.getValor(), token.getTipo()});
+        }
+    }
+
 
     private void buscarTexto() {
         buscarCampo = new JTextField();

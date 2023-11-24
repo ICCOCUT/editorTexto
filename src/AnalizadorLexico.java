@@ -15,9 +15,10 @@ public class AnalizadorLexico {
         String patronPalabraClave = "\\b(nebulizar|cúmulo|fragmento|enigma|nexo|pordefecto|espiral|nube|enlaceNebular|nebulafloracion|LeerEntero|LeerDecimal|LeerCaracter|LeerCadena|intng|doubleng|charng|stringNG|boolng)\\b";
         String patronIdentificador = "\\b[a-zA-Z][a-zA-Z0-9]*\\b";
         String patronSimbolo = "[(){}\\[\\]+\\-*/=]";
-
-        // Combinar patrones en una expresión regular
-        String patronCompleto = String.format("(%s|%s|%s)", patronPalabraClave, patronIdentificador, patronSimbolo);
+    
+        String patronNumero = "\\b\\d+(\\.\\d+)?\\b";
+        String patronCompleto = String.format("(%s|%s|%s|%s)", patronPalabraClave, patronIdentificador, patronNumero, patronSimbolo);
+       
 
         // Crear objetos Pattern y Matcher
         Pattern pattern = Pattern.compile(patronCompleto);
@@ -27,6 +28,8 @@ public class AnalizadorLexico {
         while (matcher.find()) {
             String valor = matcher.group();
             String tipo = determinarTipo(valor);
+
+            // Agregar el token a la lista
             tokens.add(new Token(tipo, valor));
         }
 
@@ -69,13 +72,15 @@ public class AnalizadorLexico {
             case ")":
                 return "SIMBOLO";
             default:
-                if (valor.matches("\\b[a-zA-Z][a-zA-Z0-9]*\\b")) {
+                if (valor.matches("\\b[a-zA-Z0-9]*\\b")) {
                     // Si es un identificador, asignar un "id" único y agregar a la tabla de símbolos
                     if (!tablaDeSimbolos.containsKey(valor)) {
                         counter++;
                         tablaDeSimbolos.put(valor, counter);
                     }
                     return "ELEMENTO_" + tablaDeSimbolos.get(valor);
+                }else if (valor.matches(".*[+\\-*/=].*")) {
+                    return "EXPRESION_ARITMETICA";                
                 } else {
                     return "DESCONOCIDO";
                 }
