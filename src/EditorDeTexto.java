@@ -15,10 +15,7 @@ public class EditorDeTexto extends JFrame implements ActionListener {
     private String nombreArchivo;
     private JTextField buscarCampo;
     private final Highlighter highlighter;
-    private JTable resultadosTabla = new JTable(new DefaultTableModel(new Object[]{"Expresión Aritmética", "Resultado"}, 0));
-    private ResultadosTabla resultadosTablaVentana;
-    private ResultadosTabla resultadosTablas;
-
+    private final JTable resultadosTabla = new JTable(new DefaultTableModel(new Object[]{"Expresión Aritmética", "Resultado"}, 0));
 
 
     private boolean modoOscuro = true;
@@ -103,8 +100,8 @@ public class EditorDeTexto extends JFrame implements ActionListener {
         analizarItem.addActionListener(this);
         resolverExpresionesItem.addActionListener(this);
         cambiarModoItem.addActionListener(this);
-        resultadosTablaVentana = new ResultadosTabla();
-        resultadosTablas = new ResultadosTabla();
+        ResultadosTabla resultadosTablaVentana = new ResultadosTabla();
+        ResultadosTabla resultadosTablas = new ResultadosTabla();
 
         fileChooser = new JFileChooser();
 
