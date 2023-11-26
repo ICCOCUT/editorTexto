@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 public class AnalizadorLexico {
 
     private int counter = 0;
-    private HashMap<String, Integer> tablaDeSimbolos = new HashMap<>();
+    private final HashMap<String, Integer> tablaDeSimbolos = new HashMap<>();
 
     public ArrayList<Token> analizarCodigo(String codigo) {
         ArrayList<Token> tokens = new ArrayList<>();

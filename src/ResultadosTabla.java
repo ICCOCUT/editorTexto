@@ -4,7 +4,7 @@ import java.awt.*;
 
 public class ResultadosTabla extends JFrame {
     public JTable resultadosTabla;
-    private EvaluadorExpresiones evaluador;
+    private final EvaluadorExpresiones evaluador;
 
     public ResultadosTabla() {
         // Crear un modelo de tabla
@@ -32,9 +32,7 @@ public class ResultadosTabla extends JFrame {
     }
 
     public void mostrarVentana() {
-        SwingUtilities.invokeLater(() -> {
-            setVisible(true);
-        });
+        SwingUtilities.invokeLater(() -> setVisible(true));
 
     }
 }

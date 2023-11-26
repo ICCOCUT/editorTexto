@@ -48,7 +48,12 @@ public class EvaluadorExpresiones {
             case "-" -> operand1 - operand2;
             case "*" -> operand1 * operand2;
             case "/" -> operand1 / operand2;
+<<<<<<< HEAD
             default -> throw new IllegalArgumentException("Operador no válido: " + operador);
+=======
+            default ->
+                    throw new IllegalArgumentException("Operador no válido: " + operador);
+>>>>>>> 4e9660e25376bc09a3a961b400a32111fd945a0e
         };
     }
 
