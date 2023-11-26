@@ -19,6 +19,7 @@ public class EditorDeTexto extends JFrame implements ActionListener {
     private ResultadosTabla resultadosTablaVentana;
     private ResultadosTabla resultadosTablas;
 
+    private EvaluadorExpresiones evaluador = new EvaluadorExpresiones();
 
 
     private boolean modoOscuro = true;
@@ -229,45 +230,56 @@ public class EditorDeTexto extends JFrame implements ActionListener {
         AnalizadorLexico analizador = new AnalizadorLexico();
         ArrayList<Token> tokens = analizador.analizarCodigo(codigo);
 
-        // Resolver expresiones aritméticas
-        resolverExpresionesAritmeticas(tokens);
+        // Filtrar expresiones aritméticas
+        ArrayList<Token> expresionesAritmeticas = new ArrayList<>();
+        for (Token token : tokens) {
+            if (token.getTipo().startsWith("ELEMENTO_")) {
+                expresionesAritmeticas.add(token);
+            }
+        }
 
-        // Mostrar resultados en la tabla
-        obtenerYMostrarResultados(tokens);
+        // Resolver expresiones aritméticas y obtener resultados
+        ArrayList<Token> resultados = resolverExpresionesAritmeticas(expresionesAritmeticas);
+
+        // Actualizar la tabla de resultados
+        actualizarTablaResultados(resultados);
+
+        if (!tokens.isEmpty()) {
+            StringBuilder resultadosTexto = new StringBuilder();
+            for (Token resultado : resultados) {
+                resultadosTexto.append("Tipo: ").append(resultado.getTipo()).append(", Valor: ").append(resultado.getValor()).append("\n");
+            }
+
+            // Mostrar resultados en la tabla
+            resultadosTablas.agregarResultado(codigo, resultadosTexto.toString());
+            resultadosTablas.mostrarVentana();
+        } else {
+            JOptionPane.showMessageDialog(this, "La lista de tokens está vacía.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
 }
 
 
-private void resolverExpresionesAritmeticas(ArrayList<Token> tokens) {
-    EvaluadorExpresiones evaluador = new EvaluadorExpresiones();
+private ArrayList<Token> resolverExpresionesAritmeticas(ArrayList<Token> expresionesAritmeticas) {
+    //EvaluadorExpresiones evaluador = new EvaluadorExpresiones();
+    ArrayList<Token> resultados = new ArrayList<>();
 
-    // Construir la expresión completa
-    StringBuilder expresionCompleta = new StringBuilder();
-    for (Token token : tokens) {
-        expresionCompleta.append(token.getValor());
-    }
-
-    try {
-        System.out.println("Evaluando expresión: " + expresionCompleta); // Mensaje de depuración
-        String resultado = evaluador.evaluarExpresion(expresionCompleta.toString());
-        System.out.println("Resultado: " + resultado); // Mensaje de depuración
-
-        // Actualizar todos los tokens con el resultado
-        for (Token token : tokens) {
-            token.setTipo("RESULTADO");
-            token.setValor(resultado);
-        }
-    } catch (Exception e) {
-        // Manejar errores al evaluar la expresión
-        for (Token token : tokens) {
-            token.setTipo("ERROR");
-            token.setValor("Error al evaluar la expresión");
+    for (Token expresion : expresionesAritmeticas) {
+        try {
+            System.out.println("Evaluando expresión: " + expresion.getValor()); // Mensaje de depuración
+            String resultado = evaluador.evaluarExpresion(expresion.getValor());
+            Token resultadoToken = new Token("RESULTADO", resultado);
+            resultados.add(resultadoToken);
+            System.out.println("Resultado: " + resultado); // Mensaje de depuración
+        } catch (Exception e) {
+            Token errorToken = new Token("ERROR", "Error al evaluar la expresión");
+            resultados.add(errorToken);
+            e.printStackTrace(); // Imprimir detalles del error
         }
     }
 
-    // Actualizar la tabla de resultados
-    actualizarTablaResultados(tokens);
-    }
+    return resultados;
 
+}
     private void obtenerYMostrarResultados(ArrayList<Token> tokens) {
         ResultadosTabla resultadosTabla = new ResultadosTabla();
     

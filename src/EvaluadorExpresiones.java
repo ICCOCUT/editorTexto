@@ -11,6 +11,11 @@ public class EvaluadorExpresiones {
     public EvaluadorExpresiones() {
         ScriptEngineManager manager = new ScriptEngineManager();
         scriptEngine = manager.getEngineByName("js");
+        if (scriptEngine == null) {
+            System.out.println("No se pudo encontrar el motor de script JavaScript.");
+        } else {
+            System.out.println("Motor de script JavaScript encontrado: " + scriptEngine);
+        }
     }
 
     public String evaluarExpresion(String expresion) throws ScriptException {
@@ -38,18 +43,13 @@ public class EvaluadorExpresiones {
         return valor.equals("+") || valor.equals("-") || valor.equals("*") || valor.equals("/");
     }
     private double aplicarOperacion(String operador, double operand1, double operand2) {
-        switch (operador) {
-            case "+":
-                return operand1 + operand2;
-            case "-":
-                return operand1 - operand2;
-            case "*":
-                return operand1 * operand2;
-            case "/":
-                return operand1 / operand2;
-            default:
-                throw new IllegalArgumentException("Operador no válido: " + operador);
-        }
+        return switch (operador) {
+            case "+" -> operand1 + operand2;
+            case "-" -> operand1 - operand2;
+            case "*" -> operand1 * operand2;
+            case "/" -> operand1 / operand2;
+            default -> throw new IllegalArgumentException("Operador no válido: " + operador);
+        };
     }
 
 }
