@@ -1,4 +1,5 @@
 
+import javax.script.ScriptException;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.BadLocationException;
@@ -15,15 +16,15 @@ public class EditorDeTexto extends JFrame implements ActionListener {
     private String nombreArchivo;
     private JTextField buscarCampo;
     private final Highlighter highlighter;
-<<<<<<< HEAD
-    private JTable resultadosTabla = new JTable(new DefaultTableModel(new Object[]{"Expresión Aritmética", "Resultado"}, 0));
+
+
     private ResultadosTabla resultadosTablaVentana;
     private ResultadosTabla resultadosTablas;
 
     private EvaluadorExpresiones evaluador = new EvaluadorExpresiones();
-=======
+
     private final JTable resultadosTabla = new JTable(new DefaultTableModel(new Object[]{"Expresión Aritmética", "Resultado"}, 0));
->>>>>>> 4e9660e25376bc09a3a961b400a32111fd945a0e
+
 
 
     private boolean modoOscuro = true;
@@ -109,7 +110,7 @@ public class EditorDeTexto extends JFrame implements ActionListener {
         resolverExpresionesItem.addActionListener(this);
         cambiarModoItem.addActionListener(this);
         ResultadosTabla resultadosTablaVentana = new ResultadosTabla();
-        ResultadosTabla resultadosTablas = new ResultadosTabla();
+        resultadosTablas = new ResultadosTabla();
 
         fileChooser = new JFileChooser();
 
@@ -234,7 +235,7 @@ public class EditorDeTexto extends JFrame implements ActionListener {
         AnalizadorLexico analizador = new AnalizadorLexico();
         ArrayList<Token> tokens = analizador.analizarCodigo(codigo);
 
-        // Filtrar expresiones aritméticas
+// Filtrar expresiones aritméticas
         ArrayList<Token> expresionesAritmeticas = new ArrayList<>();
         for (Token token : tokens) {
             if (token.getTipo().startsWith("ELEMENTO_")) {
@@ -242,65 +243,55 @@ public class EditorDeTexto extends JFrame implements ActionListener {
             }
         }
 
-        // Resolver expresiones aritméticas y obtener resultados
+// Resolver expresiones aritméticas y obtener resultados
         ArrayList<Token> resultados = resolverExpresionesAritmeticas(expresionesAritmeticas);
 
-        // Actualizar la tabla de resultados
+// Actualizar la tabla de resultados
         actualizarTablaResultados(resultados);
-
-        if (!tokens.isEmpty()) {
-            StringBuilder resultadosTexto = new StringBuilder();
-            for (Token resultado : resultados) {
-                resultadosTexto.append("Tipo: ").append(resultado.getTipo()).append(", Valor: ").append(resultado.getValor()).append("\n");
-            }
-
-            // Mostrar resultados en la tabla
-            resultadosTablas.agregarResultado(codigo, resultadosTexto.toString());
-            resultadosTablas.mostrarVentana();
-        } else {
-            JOptionPane.showMessageDialog(this, "La lista de tokens está vacía.", "Error", JOptionPane.ERROR_MESSAGE);
-        }
 }
 
 
-private ArrayList<Token> resolverExpresionesAritmeticas(ArrayList<Token> expresionesAritmeticas) {
-    //EvaluadorExpresiones evaluador = new EvaluadorExpresiones();
-    ArrayList<Token> resultados = new ArrayList<>();
+    private ArrayList<Token> resolverExpresionesAritmeticas(ArrayList<Token> expresionesAritmeticas) {
+        EvaluadorExpresiones evaluador = new EvaluadorExpresiones();
+        ArrayList<Token> resultados = new ArrayList<>();
 
-    for (Token expresion : expresionesAritmeticas) {
-        try {
-            System.out.println("Evaluando expresión: " + expresion.getValor()); // Mensaje de depuración
-            String resultado = evaluador.evaluarExpresion(expresion.getValor());
-            Token resultadoToken = new Token("RESULTADO", resultado);
-            resultados.add(resultadoToken);
-            System.out.println("Resultado: " + resultado); // Mensaje de depuración
-        } catch (Exception e) {
-            Token errorToken = new Token("ERROR", "Error al evaluar la expresión");
-            resultados.add(errorToken);
-            e.printStackTrace(); // Imprimir detalles del error
+        for (Token expresion : expresionesAritmeticas) {
+            try {
+                System.out.println("Evaluando expresión: " + expresion.getValor()); // Mensaje de depuración
+                String resultado = evaluador.evaluarExpresion(expresion.getValor());
+                Token resultadoToken = new Token("RESULTADO", resultado);
+                resultados.add(resultadoToken);
+                System.out.println("Resultado: " + resultado); // Mensaje de depuración
+            } catch (Exception e) {
+                if (e instanceof ScriptException) {
+                    // Manejar la excepción ScriptException de manera específica
+                    Token errorToken = new Token("ERROR", "Error al evaluar la expresión: " + e.getMessage());
+                    resultados.add(errorToken);
+                } else {
+                    // Manejar otras excepciones
+                    Token errorToken = new Token("ERROR", "Error desconocido al evaluar la expresión");
+                    resultados.add(errorToken);
+                }
+                e.printStackTrace(); // Imprimir detalles del error
+            }
         }
+
+        obtenerYMostrarResultados(resultados);
+        return resultados;
     }
 
-    return resultados;
-
-}
     private void obtenerYMostrarResultados(ArrayList<Token> tokens) {
-        ResultadosTabla resultadosTabla = new ResultadosTabla();
-    
         for (Token token : tokens) {
             if (token.getTipo().equals("RESULTADO")) {
-                resultadosTabla.agregarResultado(token.getValor(), token.getValor());
+                resultadosTablas.agregarResultado(token.getValor(), token.getValor());
             }
         }
-    
-        resultadosTabla.setVisible(true);
+
+        resultadosTablas.setVisible(true);
     }
 
     
     private void actualizarVentanaResultados(ArrayList<Token> tokens) {
-        // Crear una instancia de la ventana de resultados
-        ResultadosTabla resultadosTabla = new ResultadosTabla();
-    
         // Filtrar los tokens que representan resultados de expresiones
         ArrayList<Token> resultadosExpresiones = new ArrayList<>();
         for (Token token : tokens) {
@@ -308,14 +299,14 @@ private ArrayList<Token> resolverExpresionesAritmeticas(ArrayList<Token> expresi
                 resultadosExpresiones.add(token);
             }
         }
-    
+
         // Agregar los resultados a la ventana
         for (Token resultado : resultadosExpresiones) {
-            resultadosTabla.agregarResultado(resultado.getValor(), resultado.getTipo());
+            resultadosTablas.agregarResultado(resultado.getValor(), resultado.getTipo());
         }
-    
+
         // Mostrar la ventana de resultados
-        resultadosTabla.setVisible(true);
+        resultadosTablas.setVisible(true);
     }
     
     private void actualizarTablaResultados(ArrayList<Token> tokens) {
