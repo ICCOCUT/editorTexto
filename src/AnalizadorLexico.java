@@ -40,7 +40,7 @@ public class AnalizadorLexico {
 
         switch (valor) {
             case "nebulizar":
-            case "cúmulo":
+            case "cumulo":
             case "fragmento":
             case "nexo":
             case "enigma":

@@ -11,6 +11,13 @@ public class EvaluadorExpresiones {
             // Convertir la expresión a notación postfix
             ArrayList<Token> expresionPostfix = convertirAExpresionPostfix(tokens);
 
+            // Imprimir la expresión en postfix (para depuración)
+            System.out.println("Expresión en Postfix: ");
+            for (Token token : expresionPostfix) {
+                System.out.print(token.getValor() + " ");
+            }
+            System.out.println(); // Salto de línea
+
             // Resolver la expresión postfix y convertir el resultado a String
             double resultado = resolverExpresionPostfix(expresionPostfix);
             return String.valueOf(resultado);
@@ -25,18 +32,17 @@ public class EvaluadorExpresiones {
 
         for (char c : expresion.toCharArray()) {
             if (Character.isDigit(c) || c == '.') {
-                // Carácter es un dígito o un punto decimal
+                // Si el carácter es un dígito o un punto decimal, se agrega al buffer.
                 buffer.append(c);
             } else if (esOperador(String.valueOf(c))) {
-                // Carácter es un operador
+                // Si el carácter es un operador, se agrega el número actual al token.
                 agregarToken(tokens, buffer.toString());
+                // Se añade el operador como un nuevo token.
                 tokens.add(new Token("OPERADOR", String.valueOf(c)));
-                buffer.setLength(0);  // Reiniciar el buffer
+                // Se reinicia el buffer para el siguiente número.
+                buffer.setLength(0);
             } else if (Character.isWhitespace(c)) {
-                // Ignorar espacios en blanco
-            } else {
-                // Carácter no reconocido (puedes manejar paréntesis, funciones, etc. aquí)
-                // Agregar lógica según tus necesidades.
+                // Se ignoran los espacios en blanco.
             }
         }
 
@@ -45,6 +51,7 @@ public class EvaluadorExpresiones {
 
         return tokens;
     }
+
     private void agregarToken(ArrayList<Token> tokens, String valor) {
         if (!valor.isEmpty()) {
             tokens.add(new Token("NUMERO", valor));
@@ -64,7 +71,6 @@ public class EvaluadorExpresiones {
                 }
                 pila.push(token);
             }
-            // Puedes agregar lógica para otros tipos de tokens (paréntesis, funciones, etc.) aquí.
         }
 
         while (!pila.isEmpty()) {
@@ -72,8 +78,8 @@ public class EvaluadorExpresiones {
         }
 
         return expresionPostfix;
-
     }
+
     private int prioridadOperador(String operador) {
         switch (operador) {
             case "+":
@@ -82,9 +88,8 @@ public class EvaluadorExpresiones {
             case "*":
             case "/":
                 return 2;
-            // Puedes ajustar la prioridad según tus necesidades.
             default:
-                return 0;  // Prioridad predeterminada si el operador no es reconocido.
+                return 0;
         }
     }
 

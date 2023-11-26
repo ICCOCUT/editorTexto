@@ -276,7 +276,7 @@ public class EditorDeTexto extends JFrame implements ActionListener {
             }
         }
 
-        obtenerYMostrarResultados(resultados);
+        actualizarVentanaResultados(resultados);
         return resultados;
     }
 
@@ -308,13 +308,15 @@ public class EditorDeTexto extends JFrame implements ActionListener {
         // Mostrar la ventana de resultados
         resultadosTablas.setVisible(true);
     }
-    
+
     private void actualizarTablaResultados(ArrayList<Token> tokens) {
         DefaultTableModel modelo = (DefaultTableModel) resultadosTabla.getModel();
         modelo.setRowCount(0); // Limpiar la tabla antes de agregar nuevos datos
 
         for (Token token : tokens) {
-            modelo.addRow(new Object[]{token.getValor(), token.getTipo()});
+            if (token.getTipo().equals("RESULTADO")) {
+                modelo.addRow(new Object[]{token.getValor()});
+            }
         }
     }
 
